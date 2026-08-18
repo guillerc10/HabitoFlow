@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ habit.name }}</h1>
+<p>{{ habit.description }}</p>
+
+<h3>Historial</h3>
+<table class="table">
+    <thead>
+        <tr><th>Fecha</th><th>Cumplido</th></tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.date }}</td>
+            <td>{% if log.completed %}✅{% else %}❌{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">Sin registros todavía.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'habit_list' %}" class="btn btn-secondary">← Volver</a>
+{% endblock %}

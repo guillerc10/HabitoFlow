@@ -9,6 +9,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{ habit.name }}</h5>
                 <p class="card-text">{{ habit.description }}</p>
+                <a href="{% url 'habit_detail' habit.id %}" class="btn btn-primary">Ver detalle</a>
             </div>
         </div>
     </div>

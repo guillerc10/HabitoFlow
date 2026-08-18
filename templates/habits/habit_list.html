@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Mis hábitos</h1>
+<div class="row">
+    {% for habit in habits %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ habit.name }}</h5>
+                <p class="card-text">{{ habit.description }}</p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No tienes hábitos todavía.</p>
+    {% endfor %}
+</div>
+{% endblock %}

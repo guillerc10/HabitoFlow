@@ -10,6 +10,8 @@
                 <h5 class="card-title">{{ habit.name }}</h5>
                 <p class="card-text">{{ habit.description }}</p>
                 <a href="{% url 'habit_detail' habit.id %}" class="btn btn-primary">Ver detalle</a>
+                <a href="{% url 'habit_update' habit.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <a href="{% url 'habit_delete' habit.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@
 
 {% block content %}
 <h1>Mis hábitos</h1>
+<a href="{% url 'habit_create' %}" class="btn btn-success mb-3">Nuevo hábito</a>
 <div class="row">
     {% for habit in habits %}
     <div class="col-md-4 mb-3">

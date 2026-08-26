@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Crear cuenta</h2>
+<form method="post" id="signup-form">
+    {% csrf_token %}
+    {{ form.username.label_tag }}
+    {{ form.username }}
+    <br><br>
+
+    {{ form.password1.label_tag }}
+    {{ form.password1 }}
+    <ul id="password-rules" style="list-style: none; padding-left: 0; margin-top: 8px;">
+        <li id="rule-length">
+            <span class="rule-circle">⚪</span> Mínimo 8 caracteres
+        </li>
+        <li id="rule-notnumeric">
+            <span class="rule-circle">⚪</span> No puede ser solo números
+        </li>
+        <li id="rule-notcommon">
+            <span class="rule-circle">⚪</span> Evita contraseñas muy comunes (ej. "12345678", "password")
+        </li>
+    </ul>
+    <br>
+
+    {{ form.password2.label_tag }}
+    {{ form.password2 }}
+    <br><br>
+
+    <button type="submit" class="btn btn-primary">Registrarse</button>
+</form>
+
+<script>
+const commonPasswords = ['12345678', 'password', 'contraseña', 'qwerty123', '123456789', 'abcdefgh'];
+
+const pass1 = document.getElementById('id_password1');
+
+function checkRule(id, passed) {
+    const li = document.getElementById(id);
+    const circle = li.querySelector('.rule-circle');
+    circle.textContent = passed ? '🟢' : '⚪';
+}
+
+pass1.addEventListener('input', function () {
+    const value = this.value;
+
+    checkRule('rule-length', value.length >= 8);
+    checkRule('rule-notnumeric', value.length > 0 && !/^\d+$/.test(value));
+    checkRule('rule-notcommon', value.length > 0 && !commonPasswords.includes(value.toLowerCase()));
+});
+</script>
+{% endblock %}

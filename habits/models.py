@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+from django.conf import settings
 
 class Habit(models.Model):
     """
@@ -93,3 +93,5 @@ class HabitLog(models.Model):
     def __str__(self):
         status = '✅' if self.completed else '❌'
         return f'{status} {self.habit.name} — {self.date}'
+
+

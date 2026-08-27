@@ -1,0 +1,199 @@
+HABITFLOW — RESUMEN DE AVANCE (Días 1 a 6)
+Gestor de hábitos diarios hecho con Django.
+Proyecto de portafolio para entrevistas de trabajo.
+===============================================================
+
+DÍA 1 — SETUP DEL PROYECTO
+---------------------------------------------------------------
+Qué se hizo:
+- Repositorio en GitHub, .gitignore, entorno virtual (venv).
+- Instalación de Django.
+- Proyecto Django (habitflow_project) y app (habits).
+
+Tecnologías usadas:
+- Git / GitHub: control de versiones.
+- Python + entorno virtual (venv): aislar las dependencias del proyecto.
+- Django: framework web en Python.
+
+Por qué:
+Todo proyecto Django necesita un entorno aislado (para que sus paquetes
+no choquen con otros proyectos del sistema) y una estructura base antes
+de poder escribir cualquier lógica.
+
+Para qué:
+Tener la base técnica lista. Sin esto no hay dónde escribir modelos,
+vistas ni URLs.
+
+
+DÍA 2 — MODELOS Y BASE DE DATOS
+---------------------------------------------------------------
+Qué se hizo:
+- Modelo Habit (nombre, descripción, frecuencia, fecha de creación, usuario).
+- Modelo HabitLog (hábito relacionado, fecha, si se cumplió o no).
+- Migraciones para crear las tablas en SQLite.
+- Registro de ambos modelos en el Django Admin.
+
+Tecnologías usadas:
+- Django ORM (Object-Relational Mapper): traduce clases de Python a
+  tablas de base de datos sin escribir SQL a mano.
+- SQLite: base de datos ligera basada en un solo archivo, ideal para
+  desarrollo.
+- Django Admin: panel de administración generado automáticamente.
+
+Por qué:
+Los modelos son la traducción de "qué es un hábito" y "qué es un
+registro diario" a algo que la base de datos puede guardar.
+
+Para qué:
+Tener una base de datos funcional y un panel de administración donde
+cargar datos de prueba sin escribir código adicional.
+
+
+DÍA 3 — VISTAS Y TEMPLATES BASE
+---------------------------------------------------------------
+Qué se hizo:
+- Carpeta templates/ a nivel de proyecto.
+- base.html con navbar y Bootstrap 5 vía CDN, con herencia de templates
+  ({% block content %}).
+- Vista habit_list (lista todos los hábitos) + su template.
+- Vista habit_detail (hábito específico + historial de HabitLog) + su
+  template.
+- Conexión de ambas vistas por URL (/ y /habito/<id>/).
+
+Tecnologías usadas:
+- Django Views (vistas basadas en funciones): reciben una petición HTTP
+  y devuelven una respuesta.
+- Django Templates: combinan HTML con datos reales del backend.
+- Bootstrap 5 (vía CDN): framework CSS para estilos y componentes
+  responsivos sin escribir CSS desde cero.
+
+Por qué:
+Este es el paso donde los datos guardados en la base (día 2) se vuelven
+visibles para un usuario real navegando en el navegador.
+
+Para qué:
+Tener un flujo completo y verificable: admin → base de datos → vista →
+template → navegador. Este es el patrón MVT (Model-View-Template) de
+Django, base de todo lo que se construye después.
+
+
+DÍA 4 — CRUD COMPLETO DE HÁBITOS
+---------------------------------------------------------------
+Qué se hizo:
+- HabitForm (ModelForm) basado en el modelo Habit, con widgets Bootstrap.
+- Vistas habit_create, habit_update, habit_delete.
+- URLs para crear, editar y eliminar hábitos.
+- Templates habit_form.html (reutilizado para crear y editar) y
+  habit_confirm_delete.html.
+- Botones de "Nuevo hábito", "Editar" y "Eliminar" conectados en
+  habit_list.html.
+
+Tecnologías usadas:
+- Django ModelForm: genera automáticamente un formulario HTML a partir
+  de los campos de un modelo, incluyendo validación.
+- Django URL routing (path, <int:id>): mapea URLs a vistas específicas.
+
+Por qué:
+Sin un CRUD completo, los datos solo se podrían cargar desde el Admin.
+Un usuario final necesita poder crear, editar y eliminar sus propios
+hábitos desde la interfaz web.
+
+Para qué:
+Cerrar el ciclo completo de gestión de datos (Create, Read, Update,
+Delete) de forma que cualquier usuario pueda operar la app sin tocar
+el Admin.
+
+
+DÍA 5 — AUTENTICACIÓN (LOGIN / LOGOUT / REGISTRO)
+---------------------------------------------------------------
+Qué se hizo:
+- Vistas de login y logout usando las vistas ya incluidas en Django
+  (django.contrib.auth.views).
+- Vista de registro (signup) propia, usando UserCreationForm.
+- Templates login.html y signup.html.
+- Protección de todas las vistas de hábitos con @login_required.
+- Filtrado de datos por usuario: Habit.objects.filter(user=request.user)
+  en vez de .all(), y get_object_or_404(..., user=request.user) para
+  evitar que un usuario edite o vea hábitos ajenos.
+- Navbar dinámico en base.html: muestra "Hola, usuario" y botón de
+  cerrar sesión si está logueado, o "Iniciar sesión"/"Registrarse" si no.
+- Configuración de LOGIN_URL, LOGIN_REDIRECT_URL, LOGOUT_REDIRECT_URL
+  en settings.py.
+
+Tecnologías usadas:
+- Django Authentication System (django.contrib.auth): sistema de
+  usuarios, contraseñas hasheadas, sesiones, y validadores de
+  contraseña incluidos en Django.
+- UserCreationForm: formulario estándar de Django para registrar
+  usuarios nuevos.
+- Decorador @login_required: bloquea el acceso a una vista si el
+  usuario no está autenticado.
+
+Por qué:
+Sin autenticación, cualquier persona vería y podría modificar los
+hábitos de cualquier otra persona — no habría privacidad ni
+propiedad de los datos.
+
+Para qué:
+Que cada usuario tenga su propia cuenta y solo pueda ver, crear,
+editar o eliminar SUS PROPIOS hábitos. Es la base de cualquier
+aplicación multiusuario real.
+
+
+DÍA 6 — RACHAS + CHECK-IN CON JQUERY (AJAX)
+---------------------------------------------------------------
+Qué se hizo:
+- Vista habit_checkin: crea o actualiza (toggle) el HabitLog del día
+  actual para un hábito, y devuelve JSON con el estado y la racha
+  actual (JsonResponse).
+- Carga de jQuery vía CDN en base.html, y bloque {% block scripts %}
+  para inyectar JavaScript específico por página.
+- Botón "Marcar hoy" en cada tarjeta de hábito, con data-habit-id.
+- Script de jQuery que, al hacer clic, envía una petición AJAX (POST)
+  a la vista de check-in sin recargar la página, y actualiza en vivo
+  el botón y el número de racha con la respuesta.
+- Manejo del token CSRF en la petición AJAX (leído desde la cookie
+  del navegador, ya que no hay un <form> tradicional con
+  {% csrf_token %} en este botón).
+- Uso del método get_current_streak() del modelo Habit (creado desde
+  el día 2) para calcular la racha en tiempo real.
+
+Tecnologías usadas:
+- jQuery: librería de JavaScript que simplifica la manipulación del
+  DOM y las peticiones AJAX.
+- AJAX (Asynchronous JavaScript And XML): técnica para comunicarse
+  con el servidor en segundo plano, sin recargar la página completa.
+  Hoy en día casi siempre se usa con JSON en vez de XML.
+- JsonResponse (Django): respuesta HTTP con datos estructurados en
+  formato JSON, en vez de HTML renderizado.
+- CSRF protection (Django): mecanismo de seguridad contra ataques
+  Cross-Site Request Forgery, que exige un token válido en cada
+  petición POST.
+
+Por qué:
+Sin AJAX, cada check-in obligaría a recargar toda la página solo para
+marcar un hábito como cumplido — una experiencia lenta y poco moderna.
+Además, este día introduce el concepto de "backend que responde datos,
+no HTML", que es la base conceptual de una API REST.
+
+Para qué:
+Dar una experiencia de usuario fluida (sin recargas) y sentar las
+bases conceptuales de AJAX / peticiones asíncronas / respuestas JSON,
+que se van a usar de forma mucho más completa en la Fase 2 del
+proyecto (Django REST Framework + React).
+
+
+===============================================================
+CIERRE DE FASE 1 (Django + Bootstrap + jQuery — días 1 a 6)
+
+Con estos 6 días queda completo el flujo tradicional "server-side" de
+una aplicación web con Django: modelos y base de datos, vistas y
+templates, CRUD completo, autenticación multiusuario, y una primera
+interacción asíncrona con AJAX/jQuery.
+
+Lo que sigue es la Fase 2 (días 7-13): migrar la lógica de datos a una
+API con Django REST Framework y construir un frontend en React que
+consuma esa API — reemplazando los templates de Django por
+componentes de React, y las peticiones jQuery por peticiones fetch/axios
+hacia endpoints JSON.
+===============================================================

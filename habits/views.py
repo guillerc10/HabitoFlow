@@ -6,6 +6,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from rest_framework import viewsets, permissions
+from .serializers import HabitSerializer
 
 
 
@@ -87,3 +89,13 @@ def habit_checkin(request, habit_id):
         'completed': log.completed,
         'current_streak': habit.get_current_streak(),
     })
+
+class HabitViewSet(viewsets.ModelViewSet):
+    serializer_class = HabitSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Habit.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

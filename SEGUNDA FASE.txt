@@ -1,0 +1,16 @@
+Primer endpoint con Django REST Framework
+Instalaste djangorestframework y lo registraste en INSTALLED_APPS.
+Creaste HabitSerializer, que traduce el modelo Habit a JSON y viceversa (el equivalente de un ModelForm, pero para la API).
+Creaste HabitViewSet, que reemplaza tus 5 vistas manuales del CRUD (día 4) por una sola clase, filtrando por user=request.user y asignando el dueño automáticamente al crear.
+Conectaste todo con un DefaultRouter, que generó automáticamente las URLs de /api/habitos/.
+Probaste que la API funciona: lista, crea y muestra hábitos en formato JSON, respetando que cada usuario solo vea los suyos.
+
+
+
+Endpoint de check-ins (HabitLog) + seguridad
+Creaste HabitLogSerializer para exponer los registros diarios de cumplimiento.
+Creaste HabitLogViewSet, filtrando con habit__user=self.request.user (atravesando la relación HabitLog → Habit → User).
+Agregaste una validación de seguridad extra en perform_create: si alguien intenta crear un log apuntando a un hábito que no le pertenece, se rechaza con un error 403.
+Conectaste la URL /api/logs/ con el router.
+
+En resumen: ahora tienes una API REST funcional (/api/habitos/ y /api/logs/) que hace exactamente lo mismo que tu app Django tradicional de la Fase 1, pero devolviendo JSON en vez de HTML, y lista para que React la consuma en los próximos días.

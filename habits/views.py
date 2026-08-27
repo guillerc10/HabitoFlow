@@ -3,6 +3,13 @@ from django.contrib.auth.decorators import login_required
 from .models import Habit, HabitLog
 from .forms import HabitForm
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+
+
+
 
 @login_required
 def habit_list(request):
@@ -58,3 +65,25 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+@login_required
+@require_POST
+def habit_checkin(request, habit_id):
+    habit = get_object_or_404(Habit, id=habit_id, user=request.user)
+    today = timezone.localdate()
+
+    log, created = HabitLog.objects.get_or_create(
+        habit=habit,
+        date=today,
+        defaults={'completed': True}
+    )
+
+    if not created:
+        log.completed = not log.completed
+        log.save()
+
+    return JsonResponse({
+        'completed': log.completed,
+        'current_streak': habit.get_current_streak(),
+    })

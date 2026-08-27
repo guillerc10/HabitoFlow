@@ -13,6 +13,9 @@
                 <a href="{% url 'habit_detail' habit.id %}" class="btn btn-primary">Ver detalle</a>
                 <a href="{% url 'habit_update' habit.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
                 <a href="{% url 'habit_delete' habit.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                <button class="btn btn-sm btn-outline-success btn-checkin" data-habit-id="{{ habit.id }}">
+                </button>
+                <span class="ms-2">🔥 Racha: <span class="streak-count">{{ habit.get_current_streak }}</span></span>
             </div>
         </div>
     </div>
@@ -20,4 +23,46 @@
     <p>No tienes hábitos todavía.</p>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('.btn-checkin').click(function() {
+        var button = $(this);
+        var habitId = button.data('habit-id');
+        var csrftoken = $('[name=csrfmiddlewaretoken]').val() || getCookie('csrftoken');
+
+        $.ajax({
+            url: '/habito/' + habitId + '/checkin/',
+            type: 'POST',
+            headers: {'X-CSRFToken': csrftoken},
+            success: function(data) {
+                var card = button.closest('.card-body');
+                card.find('.streak-count').text(data.current_streak);
+                if (data.completed) {
+                    button.removeClass('btn-outline-success').addClass('btn-success');
+                } else {
+                    button.removeClass('btn-success').addClass('btn-outline-success');
+                }
+            }
+        });
+    });
+});
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

@@ -5,9 +5,12 @@ from django.contrib.auth import views as auth_views
 from habits import views as habit_views
 from rest_framework.routers import DefaultRouter
 from habits.views import HabitViewSet
+from habits.views import HabitLogViewSet
+
 
 router = DefaultRouter()
 router.register(r'habitos', HabitViewSet, basename='habito')
+router.register(r'logs', HabitLogViewSet, basename='habitlog')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('habits.urls')),

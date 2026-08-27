@@ -6,3 +6,10 @@ class HabitSerializer(serializers.ModelSerializer):
         model = Habit
         fields = ['id', 'name', 'description', 'frequency', 'created_at', 'is_active']
         read_only_fields = ['id', 'created_at']
+
+
+class HabitLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HabitLog
+        fields = ['id', 'habit', 'date', 'completed', 'notes']
+        read_only_fields = ['id']

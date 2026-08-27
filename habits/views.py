@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from rest_framework import viewsets, permissions
 from .serializers import HabitSerializer
-
+from .serializers import HabitLogSerializer
 
 
 
@@ -99,3 +99,17 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class HabitLogViewSet(viewsets.ModelViewSet):
+    serializer_class = HabitLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return HabitLog.objects.filter(habit__user=self.request.user)
+
+    def perform_create(self, serializer):
+        habit = serializer.validated_data['habit']
+        if habit.user != self.request.user:
+            raise permissions.PermissionDenied("No puedes crear registros de hábitos ajenos.")
+        serializer.save()

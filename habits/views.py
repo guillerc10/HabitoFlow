@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from rest_framework import viewsets, permissions
 from .serializers import HabitSerializer
 from .serializers import HabitLogSerializer
+from rest_framework.exceptions import PermissionDenied
 
 
 
@@ -111,5 +112,5 @@ class HabitLogViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         habit = serializer.validated_data['habit']
         if habit.user != self.request.user:
-            raise permissions.PermissionDenied("No puedes crear registros de hábitos ajenos.")
+            raise PermissionDenied("No puedes crear registros de hábitos ajenos.")
         serializer.save()

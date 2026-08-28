@@ -10,6 +10,8 @@ from rest_framework import viewsets, permissions
 from .serializers import HabitSerializer
 from .serializers import HabitLogSerializer
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 
 
@@ -100,6 +102,23 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def checkin(self, request, pk=None):
+        habit = self.get_object()
+        today = timezone.localdate()
+
+        log, created = HabitLog.objects.get_or_create(
+            habit=habit, date=today, defaults={'completed': True}
+        )
+        if not created:
+            log.completed = not log.completed
+            log.save()
+
+        return Response({
+            'completed': log.completed,
+            'current_streak': habit.get_current_streak(),
+        })
 
 
 class HabitLogViewSet(viewsets.ModelViewSet):

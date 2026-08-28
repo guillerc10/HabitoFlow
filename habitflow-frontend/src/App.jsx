@@ -1,7 +1,9 @@
+import HabitList from './HabitList';
+
 function App() {
   return (
     <div>
-      <h1>HabitFlow</h1>
+      <HabitList />
     </div>
   );
 }

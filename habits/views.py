@@ -126,7 +126,11 @@ class HabitLogViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return HabitLog.objects.filter(habit__user=self.request.user)
+        queryset = HabitLog.objects.filter(habit__user=self.request.user)
+        habit_id = self.request.query_params.get('habit')
+        if habit_id:
+            queryset = queryset.filter(habit_id=habit_id)
+        return queryset
 
     def perform_create(self, serializer):
         habit = serializer.validated_data['habit']

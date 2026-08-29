@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: habitflow
+      POSTGRES_USER: habitflow_user
+      POSTGRES_PASSWORD: habitflow_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_DB: habitflow
+      POSTGRES_USER: habitflow_user
+      POSTGRES_PASSWORD: habitflow_pass
+      DB_HOST: db
+    depends_on:
+      - db
+
+  frontend:
+    build: ./habitflow-frontend
+    volumes:
+      - ./habitflow-frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

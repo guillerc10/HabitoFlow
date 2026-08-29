@@ -75,11 +75,16 @@ WSGI_APPLICATION = 'habitflow_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+import os
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'habitflow'),
+        'USER': os.environ.get('POSTGRES_USER', 'habitflow_user'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'habitflow_pass'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': '5432',
     }
 }
 

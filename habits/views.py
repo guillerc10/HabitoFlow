@@ -12,6 +12,10 @@ from .serializers import HabitLogSerializer
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 
 
@@ -137,3 +141,31 @@ class HabitLogViewSet(viewsets.ModelViewSet):
         if habit.user != self.request.user:
             raise PermissionDenied("No puedes crear registros de hábitos ajenos.")
         serializer.save()
+
+
+
+
+
+@ensure_csrf_cookie
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_csrf_token(request):
+    return Response({'detail': 'CSRF cookie set'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def api_login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return Response({'username': user.username})
+    return Response({'error': 'Credenciales inválidas'}, status=400)
+
+
+@api_view(['POST'])
+def api_logout(request):
+    logout(request)
+    return Response({'detail': 'Sesión cerrada'})

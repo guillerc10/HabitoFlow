@@ -1,0 +1,278 @@
+HABITFLOW — RESUMEN DE AVANCE (Días 7 a 13)
+Fase 2: API con Django REST Framework + Frontend con React
+===============================================================
+
+CAMBIO DE PARADIGMA DE ESTA FASE
+---------------------------------------------------------------
+En la Fase 1, Django hacía todo: recibía la petición, decidía qué
+mostrar y armaba el HTML completo con templates.
+
+En la Fase 2, se separan dos aplicaciones independientes:
+- Django deja de armar HTML y pasa a ser solo un proveedor de datos
+  (una API que responde JSON).
+- React se encarga de pedir esos datos y decidir cómo mostrarlos.
+
+Por qué: reusabilidad (la misma API podría alimentar una web, una app
+móvil, etc.), es el estándar de la industria para aplicaciones
+grandes, y permite interfaces más dinámicas sin depender de recargar
+el servidor.
+
+
+DÍA 7 — Primer endpoint con Django REST Framework
+---------------------------------------------------------------
+Qué se hizo:
+- Instalación de djangorestframework, registrado en INSTALLED_APPS.
+- HabitSerializer: traduce el modelo Habit a JSON y viceversa.
+- HabitViewSet: reemplaza las 5 vistas manuales del CRUD (día 4) por
+  una sola clase, filtrando por user=request.user y asignando el
+  dueño automáticamente al crear.
+- DefaultRouter conectado en las URLs, generando automáticamente
+  /api/habitos/.
+
+Tecnologías usadas:
+- Django REST Framework (DRF): librería para construir APIs REST
+  sobre Django.
+- Serializer (ModelSerializer): el equivalente de un ModelForm pero
+  para JSON — convierte objetos de Python a JSON y valida datos
+  entrantes.
+- ViewSet (ModelViewSet): clase que agrupa las 5 operaciones CRUD
+  (listar, crear, ver, editar, eliminar) en un solo lugar.
+- Router (DefaultRouter): genera automáticamente las URLs de un
+  ViewSet.
+- Browsable API: interfaz visual que DRF genera para probar la API
+  desde el navegador sin necesitar Postman ni frontend.
+
+Por qué:
+Django por sí solo no tiene un sistema organizado para devolver JSON
+de forma estandarizada, con validación, permisos y paginación
+incluidos.
+
+Para qué:
+Tener una API funcional que en los próximos días va a alimentar un
+frontend en React, en vez de servir HTML directamente.
+
+
+DÍA 8 — Endpoint de check-ins (HabitLog) + seguridad
+---------------------------------------------------------------
+Qué se hizo:
+- HabitLogSerializer para exponer los registros diarios.
+- HabitLogViewSet, filtrando con habit__user=self.request.user
+  (atraviesa la relación HabitLog → Habit → User).
+- Validación de seguridad en perform_create: si un usuario intenta
+  crear un log apuntando a un hábito que no le pertenece, se rechaza
+  con un error 403 (PermissionDenied).
+- Prueba real con dos cuentas confirmando el rechazo 403.
+
+Tecnologías usadas:
+- Lookups de Django ORM con doble guion bajo (__): permite
+  "atravesar" relaciones entre modelos en una consulta, similar a un
+  JOIN de SQL.
+- rest_framework.exceptions.PermissionDenied: excepción de DRF que
+  genera una respuesta 403 Forbidden.
+
+Por qué:
+Sin esta validación, cualquier usuario autenticado podría crear
+registros falsos en hábitos ajenos, solo adivinando o probando IDs.
+
+Para qué:
+Garantizar que la propiedad de los datos (ya lograda en la Fase 1
+con las vistas tradicionales) se mantenga también en la API.
+
+
+DÍA 9 — Setup de React
+---------------------------------------------------------------
+Qué se hizo:
+- Proyecto React creado con Vite (plantilla react, linter ESLint),
+  como carpeta hermana del proyecto Django dentro del mismo
+  repositorio de Git.
+- Instalación de axios.
+- Instalación y configuración de django-cors-headers en Django
+  (INSTALLED_APPS, MIDDLEWARE, CORS_ALLOWED_ORIGINS) para permitir
+  que React (puerto 5173) le pida datos a Django (puerto 8000).
+- App.jsx limpiado, dejando una base simple para empezar a construir.
+
+Tecnologías usadas:
+- Node.js / npm: entorno de ejecución de JavaScript y su gestor de
+  paquetes (el "pip" de JavaScript).
+- Vite: herramienta moderna para crear y correr proyectos de
+  frontend (más rápida que Create React App).
+- React: librería de JavaScript para construir interfaces mediante
+  componentes reutilizables.
+- axios: librería para hacer peticiones HTTP desde el navegador,
+  similar a fetch() pero con sintaxis más cómoda.
+- CORS (Cross-Origin Resource Sharing): mecanismo de seguridad del
+  navegador que bloquea peticiones entre distintos orígenes
+  (dominio/puerto) a menos que el servidor lo autorice explícitamente.
+
+Por qué:
+React necesita vivir en un proyecto y servidor de desarrollo aparte
+de Django. Sin configurar CORS, el navegador bloquea por seguridad
+cualquier intento de React de pedirle datos a la API de Django.
+
+Para qué:
+Tener la base técnica de un frontend moderno, separado del backend,
+lista para consumir la API construida en los días 7 y 8.
+
+
+DÍA 10 — CRUD y check-in conectados a la API desde React
+---------------------------------------------------------------
+Qué se hizo:
+- api.js: instancia de axios configurada con la URL base de la API
+  y withCredentials para enviar la cookie de sesión de Django.
+- HabitList.jsx: primer componente de React, que pide la lista de
+  hábitos a /api/habitos/ y la muestra en pantalla.
+- Acción personalizada @action "checkin" agregada al HabitViewSet en
+  Django, exponiendo /api/habitos/<id>/checkin/ como parte de la API
+  (reemplazando la vista tradicional del día 6 para este flujo).
+- Botón "Marcar hoy" conectado a esa acción vía petición POST.
+
+Errores resueltos en el proceso (parte real del aprendizaje):
+- Extensión de archivo incorrecta (.js en vez de .jsx) impedía que
+  Vite interpretara JSX correctamente.
+- Error de CORS por falta de CORS_ALLOW_CREDENTIALS = True en Django
+  (necesario además de CORS_ALLOWED_ORIGINS cuando se usan cookies).
+- Error 403 por inconsistencia de dominio: usar 127.0.0.1 en una
+  parte y localhost en otra hace que el navegador trate las cookies
+  como de sitios distintos. Solución: usar localhost de forma
+  consistente en todo el proyecto.
+- Error 403 en peticiones POST por falta del token CSRF: se agregó
+  un interceptor en axios que lee la cookie csrftoken del navegador
+  y la agrega automáticamente a cada petición, más
+  CSRF_TRUSTED_ORIGINS en settings.py.
+
+Tecnologías usadas:
+- React Hooks: useState (estado del componente) y useEffect (código
+  que se ejecuta en momentos específicos, como la carga inicial).
+- @action de DRF: decorador para agregar endpoints personalizados a
+  un ViewSet, más allá del CRUD estándar.
+- Interceptores de axios: funciones que se ejecutan automáticamente
+  antes de cada petición, usadas aquí para inyectar el token CSRF.
+- Cookies de sesión y CSRF: mecanismos de Django para mantener la
+  sesión del usuario y protegerse contra ataques de falsificación de
+  peticiones.
+
+Por qué:
+Conectar React con la API real, en vez de datos de prueba, es lo que
+convierte el proyecto en una aplicación funcional de verdad.
+
+Para qué:
+Tener la primera pantalla completamente funcional: ver hábitos reales
+y marcar check-ins, todo sin recargar la página, gestionado por React
+en vez de por templates de Django.
+
+
+DÍA 11 — Visualización de progreso (rachas + heatmap tipo GitHub)
+---------------------------------------------------------------
+Qué se hizo:
+- current_streak agregado como SerializerMethodField en
+  HabitSerializer, calculado con el método get_current_streak() que
+  ya existía en el modelo Habit desde el día 2.
+- Filtro opcional ?habit=<id> agregado a HabitLogViewSet, para pedir
+  solo los logs de un hábito específico.
+- Instalación de date-fns para el manejo de fechas.
+- HabitDetail.jsx: componente nuevo que muestra un heatmap de los
+  últimos 30 días, coloreando en verde los días cumplidos.
+- HabitList.jsx actualizado para mostrar la racha actual de cada
+  hábito y permitir expandir/ocultar el progreso de cada uno.
+
+Tecnologías usadas:
+- SerializerMethodField (DRF): campo de un serializer que no viene
+  directo del modelo, sino que se calcula con un método.
+- date-fns: librería para operaciones con fechas en JavaScript
+  (sumar/restar días, formatear, comparar).
+- Renderizado condicional en JSX: mostrar u ocultar partes de la
+  interfaz según el estado (equivalente a un {% if %} de Django
+  templates).
+- Props en React: forma de pasar datos de un componente padre a uno
+  hijo (aquí, el id del hábito de HabitList a HabitDetail).
+
+Por qué:
+Sin esto, el usuario no tenía forma de ver su progreso histórico, solo
+el estado del día actual.
+
+Para qué:
+Dar contexto visual e histórico del cumplimiento de cada hábito, un
+elemento clave de cualquier app de seguimiento de hábitos real.
+
+
+DÍA 12 — Login desde React
+---------------------------------------------------------------
+Qué se hizo:
+- Vista get_csrf_token en Django (con @ensure_csrf_cookie) para que
+  React pueda obtener la cookie CSRF antes del primer login.
+- Vistas api_login y api_logout en Django, usando authenticate() y
+  login()/logout() de Django, expuestas como endpoints de API con
+  permiso AllowAny (accesibles sin estar logueado).
+- Login.jsx: formulario controlado de React (usuario y contraseña),
+  que llama a esos endpoints.
+- App.jsx actualizado para alternar entre el formulario de Login y
+  la lista de hábitos, según si hay un usuario autenticado o no.
+
+Tecnologías usadas:
+- Autenticación por sesión de Django, integrada con un frontend
+  separado (en vez de que el usuario visite /login/ directamente en
+  Django).
+- Formularios controlados en React: patrón donde el valor de un
+  input vive en el estado del componente (value + onChange), no
+  directamente en el DOM.
+- Operador ternario y Fragments (<>...</>) en JSX: para mostrar un
+  componente u otro según una condición, sin HTML envolvente extra.
+
+Por qué:
+Una app de React real necesita su propia pantalla de login, sin
+depender de que el usuario abra manualmente una URL de Django.
+
+Para qué:
+Cerrar el flujo de autenticación completo dentro de la experiencia de
+React, haciendo que el frontend sea autosuficiente.
+
+
+DÍA 13 — Pulido de UI y responsive
+---------------------------------------------------------------
+Qué se hizo:
+- Bootstrap instalado en el proyecto React e importado globalmente.
+- Login.jsx, HabitList.jsx y App.jsx rediseñados con clases de
+  Bootstrap (tarjetas, botones, formularios, navbar).
+- Grid responsive en HabitList.jsx (col-12 col-md-6 col-lg-4): una
+  tarjeta por fila en celular, dos en tablet, tres en computadora,
+  sin escribir media queries a mano.
+- HabitDetail.jsx mejorado: borde visual distintivo en el cuadrito
+  del día de hoy, tooltips con fecha completa en español (usando el
+  locale de date-fns), y una leyenda explicando los colores del
+  heatmap.
+
+Tecnologías usadas:
+- Bootstrap (en React): mismo framework CSS usado en la Fase 1,
+  reutilizado aquí para mantener consistencia visual en todo el
+  proyecto.
+- Sistema de grid responsive de Bootstrap (columnas por breakpoint).
+- date-fns/locale: localización de fechas a español (nombres de mes
+  y día).
+
+Por qué:
+Un CRUD funcional sin cuidado visual no transmite profesionalismo en
+una entrevista; además, una app que solo se ve bien en computadora
+no refleja buenas prácticas actuales, donde el uso desde celular es
+mayoritario.
+
+Para qué:
+Dejar la Fase 2 con una interfaz consistente, clara y adaptable a
+cualquier tamaño de pantalla, lista para mostrarse como parte de un
+portafolio profesional.
+
+
+===============================================================
+CIERRE DE FASE 2 (Django REST Framework + React — días 7 a 13)
+
+Con estos 7 días, HabitFlow pasó de ser una aplicación tradicional de
+Django (server-side, con templates) a una arquitectura moderna de
+API + SPA (Single Page Application): un backend Django que solo
+expone datos vía API REST, protegidos por autenticación y permisos
+por usuario, y un frontend en React que consume esa API, maneja su
+propio estado, y ofrece una interfaz visual pulida y responsive.
+
+Lo que sigue es la Fase 3 (días 14-17): dockerizar el backend y el
+frontend con docker-compose, hacer testing y corrección de errores,
+y cerrar el proyecto con un README final, capturas de pantalla, y
+despliegue opcional.
+===============================================================

@@ -9,7 +9,9 @@ function App() {
     <div>
       {user ? (
         <>
-          <p>Hola, {user}</p>
+          <nav className="navbar navbar-dark bg-dark px-3">
+            <span className="navbar-text text-white">Hola, {user}</span>
+          </nav>
           <HabitList />
         </>
       ) : (

@@ -18,27 +18,42 @@ function HabitList() {
 
   const handleCheckin = (habitId) => {
     api.post(`habitos/${habitId}/checkin/`)
-      .then(() => {
-        loadHabits();
-      })
+      .then(() => loadHabits())
       .catch(error => console.error('Error en check-in:', error));
   };
 
   return (
-    <div>
-      <h1>Mis hábitos</h1>
-      {habits.map(habit => (
-        <div key={habit.id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
-          <h3>{habit.name}</h3>
-          <p>{habit.description}</p>
-          <p>🔥 Racha actual: {habit.current_streak}</p>
-          <button onClick={() => handleCheckin(habit.id)}>Marcar hoy</button>
-          <button onClick={() => setExpandedId(expandedId === habit.id ? null : habit.id)}>
-            {expandedId === habit.id ? 'Ocultar progreso' : 'Ver progreso'}
-          </button>
-          {expandedId === habit.id && <HabitDetail habitId={habit.id} />}
-        </div>
-      ))}
+    <div className="container py-4">
+      <h1 className="mb-4">Mis hábitos</h1>
+      <div className="row g-3">
+        {habits.map(habit => (
+          <div className="col-12 col-md-6 col-lg-4" key={habit.id}>
+            <div className="card h-100 shadow-sm">
+              <div className="card-body d-flex flex-column">
+                <h5 className="card-title">{habit.name}</h5>
+                <p className="card-text text-muted">{habit.description}</p>
+                <p className="mb-2">🔥 Racha actual: <strong>{habit.current_streak}</strong></p>
+                <div className="mt-auto d-flex gap-2 flex-wrap">
+                  <button className="btn btn-success btn-sm" onClick={() => handleCheckin(habit.id)}>
+                    Marcar hoy
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => setExpandedId(expandedId === habit.id ? null : habit.id)}
+                  >
+                    {expandedId === habit.id ? 'Ocultar progreso' : 'Ver progreso'}
+                  </button>
+                </div>
+                {expandedId === habit.id && (
+                  <div className="mt-3">
+                    <HabitDetail habitId={habit.id} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

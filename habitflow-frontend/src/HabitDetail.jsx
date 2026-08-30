@@ -35,7 +35,7 @@ function HabitDetail({ habitId }) {
               style={{
                 width: '16px',
                 height: '16px',
-                backgroundColor: isCompleted(day) ? '#40c463' : '#e9ecef',
+                backgroundColor: isCompleted(day) ? '#D1D066' : '#e9ecef',
                 borderRadius: '2px',
                 border: isToday ? '2px solid #0d6efd' : 'none',
                 boxSizing: 'border-box',

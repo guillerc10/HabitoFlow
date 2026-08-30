@@ -5,6 +5,7 @@ import HabitForm from './HabitForm';
 import ConfirmDelete from './ConfirmDelete';
 import ReminderBanner from './ReminderBanner';
 import useNotifications from './useNotifications';
+import HabitCalendar from './HabitCalendar';
 
 function HabitList() {
   const [habits, setHabits] = useState([]);
@@ -13,6 +14,7 @@ function HabitList() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [deletingHabit, setDeletingHabit] = useState(null);
   const { permission, requestPermission, notify } = useNotifications();
+  const [viewMode, setViewMode] = useState({});
 
   const loadHabits = () => {
     api.get('habitos/')
@@ -129,11 +131,33 @@ function HabitList() {
                         Eliminar
                       </button>
                     </div>
-                    {expandedId === habit.id && (
-                      <div className="mt-3">
-                        <HabitDetail habitId={habit.id} />
-                      </div>
-                    )}
+                   {expandedId === habit.id && (
+  <div className="mt-3">
+    <ul className="nav nav-tabs nav-tabs-sm mb-3">
+      <li className="nav-item">
+        <button
+          className={`nav-link btn btn-link ${viewMode[habit.id] !== 'calendar' ? 'active' : ''}`}
+          onClick={() => setViewMode({ ...viewMode, [habit.id]: 'heatmap' })}
+        >
+          Últimos 30 días
+        </button>
+      </li>
+      <li className="nav-item">
+        <button
+          className={`nav-link btn btn-link ${viewMode[habit.id] === 'calendar' ? 'active' : ''}`}
+          onClick={() => setViewMode({ ...viewMode, [habit.id]: 'calendar' })}
+        >
+          Calendario
+        </button>
+      </li>
+    </ul>
+    {viewMode[habit.id] === 'calendar' ? (
+      <HabitCalendar habitId={habit.id} />
+    ) : (
+      <HabitDetail habitId={habit.id} />
+    )}
+  </div>
+)}
                   </>
                 )}
               </div>

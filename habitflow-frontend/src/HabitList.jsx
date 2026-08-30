@@ -3,6 +3,8 @@ import api from './api';
 import HabitDetail from './HabitDetail';
 import HabitForm from './HabitForm';
 import ConfirmDelete from './ConfirmDelete';
+import ReminderBanner from './ReminderBanner';
+import useNotifications from './useNotifications';
 
 function HabitList() {
   const [habits, setHabits] = useState([]);
@@ -10,6 +12,7 @@ function HabitList() {
   const [editingHabit, setEditingHabit] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [deletingHabit, setDeletingHabit] = useState(null);
+  const { permission, requestPermission, notify } = useNotifications();
 
   const loadHabits = () => {
     api.get('habitos/')
@@ -20,6 +23,19 @@ function HabitList() {
   useEffect(() => {
     loadHabits();
   }, []);
+
+  useEffect(() => {
+    if (permission === 'granted' && habits.length > 0) {
+      const pending = habits.filter(h => !h.completed_today && h.is_active);
+      if (pending.length > 0) {
+        notify('HabitFlow — Recordatorio', {
+          body: `Te falta${pending.length > 1 ? 'n' : ''} marcar: ${pending.map(h => h.name).join(', ')}`,
+          icon: '🔥',
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habits, permission]);
 
   const handleCheckin = (habitId) => {
     api.post(`habitos/${habitId}/checkin/`)
@@ -44,6 +60,14 @@ function HabitList() {
           + Nuevo hábito
         </button>
       </div>
+
+      {habits.length > 0 && (
+        <ReminderBanner
+          habits={habits}
+          permission={permission}
+          onRequestPermission={requestPermission}
+        />
+      )}
 
       {showCreateForm && (
         <div className="card p-3 mb-4 shadow-sm">

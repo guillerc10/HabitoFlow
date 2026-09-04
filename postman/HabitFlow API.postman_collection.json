@@ -1,0 +1,331 @@
+{
+  "info": {
+    "_postman_id": "2c66c600-bccc-482a-b2b3-0dd99858fbbd",
+    "name": "HabitFlow API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57830633",
+    "_collection_link": "https://go.postman.co/collection/57830633-2c66c600-bccc-482a-b2b3-0dd99858fbbd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "CSRF TOKEN",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const csrfCookie = pm.cookies.get(\"csrftoken\");\npm.environment.set(\"csrftoken\", csrfCookie);\n\nconsole.log(\"CSRF Token guardado:\", csrfCookie);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/csrf",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "csrf"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "LOGIN",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code es 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"La respuesta incluye el username\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"username\");\n});\n\npm.test(\"El tiempo de respuesta es aceptable\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(1000);\n});\n\n// Re-captura el CSRF token porque Django lo rota tras el login\nconst csrfCookie = pm.cookies.get(\"csrftoken\");\npm.environment.set(\"csrftoken\", csrfCookie);\nconsole.log(\"CSRF Token actualizado post-login:\", csrfCookie);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-CSRFToken",
+            "value": "{{csrftoken}}"
+          },
+          {
+            "key": "",
+            "value": ""
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"guillermocaceres\",\n  \"password\": \"835guille\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/login/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "login",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Habitos",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response is an array\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.be.an('array');\n});\n\npm.test(\"Response time is acceptable\", function () {\n    pm.expect(pm.response.responseTime).to.be.below(1000);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/habitos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "habitos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create habits",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Created habit has correct name\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.name).to.eql(\"Test habit via Postman\");\n});\n\npm.test(\"New habit has an id\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"id\");\n});\n\npm.test(\"Defaults are correct on creation\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.current_streak).to.eql(0);\n    pm.expect(jsonData.completed_today).to.eql(false);\n});\n\n// Save the new id for later requests (PUT/DELETE)\npm.environment.set(\"habito_id\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-CSRFToken",
+            "value": "{{csrftoken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Test habit via Postman\",\n    \"description\": \"Created to test the POST endpoint\",\n    \"frequency\": \"daily\",\n    \"is_active\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/habitos/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "habitos",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET A SINGLE  HABIT BY ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Returned habit matches the created one\", function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.eql(parseInt(pm.environment.get(\"habito_id\")));",
+              "    pm.expect(jsonData.name).to.eql(\"Test habit via Postman\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/habitos/{{habito_id}}/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "habitos",
+            "{{habito_id}}",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "UPDATE PUT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Name was updated\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.name).to.eql(\"Test habit via Postman (updated)\");\n});\n\npm.test(\"Frequency was updated\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.frequency).to.eql(\"weekly\");\n});\n\npm.test(\"ID stayed the same\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.id).to.eql(parseInt(pm.environment.get(\"habito_id\")));\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "X-CSRFToken",
+            "value": "{{csrftoken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Test habit via Postman (updated)\",\n    \"description\": \"Updated via PUT request\",\n    \"frequency\": \"weekly\",\n    \"is_active\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/habitos/{{habito_id}}/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "habitos",
+            "{{habito_id}}",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204\", function () {\n    pm.response.to.have.status(204);\n});\n\npm.test(\"Response body is empty\", function () {\n    pm.expect(pm.response.text()).to.eql(\"\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-CSRFToken",
+            "value": "{{csrftoken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/habitos/{{habito_id}}/",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "habitos",
+            "{{habito_id}}",
+            ""
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": ""
+    },
+    {
+      "key": "csrftoken",
+      "value": ""
+    },
+    {
+      "key": "habito_id",
+      "value": ""
+    }
+  ]
+}

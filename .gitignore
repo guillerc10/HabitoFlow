@@ -7,3 +7,4 @@ db.sqlite3
 *.swp
 .vscode/
 .env
+node_modules

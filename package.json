@@ -1,0 +1,24 @@
+{
+  "name": "habitoflow",
+  "version": "1.0.0",
+  "description": "Aplicación full-stack de seguimiento de hábitos diarios, construida como proyecto de portafolio en 17 días. Backend con Django + Django REST Framework, frontend con React, base de datos PostgreSQL, y todo containerizado con Docker.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guillerc10/HabitoFlow.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/guillerc10/HabitoFlow/issues"
+  },
+  "homepage": "https://github.com/guillerc10/HabitoFlow#readme",
+  "devDependencies": {
+    "newman": "^6.2.2"
+  }
+}

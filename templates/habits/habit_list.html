@@ -4,9 +4,17 @@
 <h1>Mis hábitos</h1>
 <a href="{% url 'habit_create' %}" class="btn btn-success mb-3">Nuevo hábito</a>
 <div class="row">
-    {% for habit in habits %}
+   {% for habit in habits %}
     <div class="col-md-4 mb-3">
-        <div class="card">
+        {% if habit.get_current_streak >= 21 %}
+        <div class="card" style="--card-blob: rgba(13, 148, 136, 0.35);">
+        {% elif habit.get_current_streak >= 7 %}
+        <div class="card" style="--card-blob: rgba(13, 148, 136, 0.20);">
+        {% elif habit.get_current_streak >= 1 %}
+        <div class="card" style="--card-blob: rgba(13, 148, 136, 0.10);">
+        {% else %}
+        <div class="card" style="--card-blob: transparent;">
+        {% endif %}
             <div class="card-body">
                 <h5 class="card-title">{{ habit.name }}</h5>
                 <p class="card-text">{{ habit.description }}</p>
@@ -21,11 +29,12 @@
     </div>
     {% empty %}
     <p>No tienes hábitos todavía.</p>
-    {% endfor %}
+{% endfor %}
 </div>
 {% endblock %}
 
 {% block scripts %}
+{{ block.super }}
 <script>
 $(document).ready(function() {
     $('.btn-checkin').click(function() {
